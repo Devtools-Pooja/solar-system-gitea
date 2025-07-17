@@ -1,17 +1,11 @@
 pipeline {
     agent any
-
-    tools {
-        nodejs 'nodejs-22-6-0'
-    }
-
     stages {
         stage('Installing Dependencies') {
             steps {
                 sh 'npm install --no-audit'
             }
         }
-
         stage('Dependency Scanning') {
             parallel {
                 stage('NPM Dependency Audit') {
@@ -22,7 +16,6 @@ pipeline {
                         '''
                     }
                 }
-
                 stage('OWASP Dependency Check') {
                     steps {
                         dependencyCheck additionalArguments: '''
@@ -30,7 +23,8 @@ pipeline {
                             --out './'
                             --format 'ALL'
                             --prettyPrint
-                        ''', odcInstallation: 'OWASP-DepCheck-12'
+                        ''', odcInstallation: 'OWASP-DepCheck-10'
+                        dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
                     }
                 }
             }
