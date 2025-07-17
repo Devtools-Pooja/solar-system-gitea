@@ -1,21 +1,24 @@
-tools {
-    nodejs 'nodejs-22-6-0'
-}
+pipeline {
+    agent any
 
-
-stages {
-    stage('Installing Dependencies') {
-        steps {
-            sh 'npm install --no-audit'
-        }
+    tools {
+        nodejs 'nodejs-22-6-0'
     }
-    
-    stage('NPM Dependency Audit') {
-        steps {
-            sh '''
-                npm audit --audit-level=critical
-                echo $?
-            '''
+
+    stages {
+        stage('Installing Dependencies') {
+            steps {
+                sh 'npm install --no-audit'
+            }
+        }
+
+        stage('NPM Dependency Audit') {
+            steps {
+                sh '''
+                    npm audit --audit-level=critical
+                    echo $?
+                '''
+            }
         }
     }
 }
