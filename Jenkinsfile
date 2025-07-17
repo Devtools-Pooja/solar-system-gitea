@@ -33,6 +33,8 @@ pipeline {
                         ''', odcInstallation: 'OWASP-DepCheck-12'
 
                         dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                        
+                        junit allowEmptyResults: true, keepProperties: true, testResults: 'dependency-check-junit.xml'
 
                         publishHTML([
                             allowMissing: true,
@@ -50,4 +52,3 @@ pipeline {
         }
     }
 }
-
