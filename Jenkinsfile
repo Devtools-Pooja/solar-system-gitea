@@ -9,9 +9,18 @@ pipeline {
         MONGO_URI = "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
     }
 
+    options {
+        disableResume()
+        disableConcurrentBuilds abortPrevious: true
+    }
+
     stages {
         stage('Installing Dependencies') {
+            options { 
+                timestamps() 
+            }
             steps {
+                sh 'sleep 100s'
                 sh 'npm install --no-audit'
             }
         }
@@ -36,7 +45,11 @@ pipeline {
                             --prettyPrint
                         ''', odcInstallation: 'OWASP-DepCheck-12'
 
-                        dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                        dependencyCheckPublisher(
+                            failedTotalCritical: 1, 
+                            pattern: 'dependency-check-report.xml', 
+                            stopBuild: true
+                        )
 
                         junit allowEmptyResults: true, keepProperties: true, testResults: 'dependency-check-junit.xml'
 
@@ -56,6 +69,9 @@ pipeline {
         }
 
         stage('Unit Testing') {
+            options { 
+                retry(2) 
+            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'mongo-db-credentials', 
