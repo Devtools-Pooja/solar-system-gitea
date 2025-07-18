@@ -37,7 +37,7 @@ pipeline {
                         ''', odcInstallation: 'OWASP-DepCheck-12'
 
                         dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
-                        
+
                         junit allowEmptyResults: true, keepProperties: true, testResults: 'dependency-check-junit.xml'
 
                         publishHTML([
@@ -52,19 +52,19 @@ pipeline {
                         ])
                     }
                 }
-                
-                stage('Unit Testing') {
-                    steps {
-                        withCredentials([usernamePassword(
-                            credentialsId: 'mongo-db-credentials', 
-                            passwordVariable: 'MONGO_PASSWORD', 
-                            usernameVariable: 'MONGO_USERNAME'
-                        )]) {
-                            sh 'npm test'
-                        }
-                        junit allowEmptyResults: true, testResults: 'test-results.xml'
-                    }
+            }
+        }
+
+        stage('Unit Testing') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'mongo-db-credentials', 
+                    passwordVariable: 'MONGO_PASSWORD', 
+                    usernameVariable: 'MONGO_USERNAME'
+                )]) {
+                    sh 'npm test'
                 }
+                junit allowEmptyResults: true, testResults: 'test-results.xml'
             }
         }
     }
