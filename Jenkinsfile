@@ -45,7 +45,6 @@ pipeline {
                             --scan './'
                             --out './'
                             --format 'ALL'
-                            --disableYarnAudit
                             --prettyPrint
                         ''', odcInstallation: 'OWASP-DepCheck-12'
 
@@ -86,9 +85,9 @@ pipeline {
                         sh 'echo $SONAR_SCANNER_HOME'
                         sh '''
                             $SONAR_SCANNER_HOME/bin/sonar-scanner \
-                            -Dsonar.projectKey=Solar-System-Project \
-                            -Dsonar.sources=app.js \
-                            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+                              -Dsonar.projectKey=Solar-System-Project \
+                              -Dsonar.sources=app.js \
+                              -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
                         '''
                     }
                     waitForQualityGate abortPipeline: true
