@@ -95,6 +95,13 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'printenv'
+                sh 'docker build -t poojadocker404/solar-system:$GIT_COMMIT .'
+            }
+        }
     }
 
     post {
