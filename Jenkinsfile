@@ -105,8 +105,14 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry(credentialsId: 'docker-hub-credentials') {
-                    sh 'docker push poojadocker404/solar-system:$GIT_COMMIT'
+                withCredentials([string(credentialsId: 'docker-hub-pat', variable: 'DOCKER_PAT')]) {
+                    sh '''
+                        echo "Logging in to Docker Hub..."
+                        echo "$DOCKER_PAT" | docker login -u poojadocker404 --password-stdin
+                        
+                        echo "Pushing image to Docker Hub..."
+                        docker push poojadocker404/solar-system:$GIT_COMMIT
+                    '''
                 }
             }
         }
@@ -138,4 +144,3 @@ pipeline {
         }
     }
 }
-
