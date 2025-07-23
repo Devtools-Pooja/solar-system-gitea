@@ -102,6 +102,14 @@ pipeline {
                 sh 'docker build -t poojadocker404/solar-system:$GIT_COMMIT .'
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                withDockerRegistry(credentialsId: 'docker-hub-credentials', url: '""') {
+                    sh 'docker push poojadocker404/solar-system:$GIT_COMMIT'
+                }
+            }
+        }
     }
 
     post {
