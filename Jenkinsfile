@@ -79,7 +79,7 @@ pipeline {
 
         stage('Deploy - AWS EC2') {
             when {
-                branch 'test/*'
+                 branch 'test'
             }
             steps {
                 script {
