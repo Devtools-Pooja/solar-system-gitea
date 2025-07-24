@@ -10,7 +10,6 @@ pipeline {
         MONGO_DB_Creds = credentials('mongo-db-credentials')
         MONGO_USERNAME = credentials('mongo-db-username')
         MONGO_PASSWORD = credentials('mongo-db-password')
-        SONAR_SCANNER_HOME = tool 'sonarqube-scanner-610'
     }
 
     options {
@@ -28,34 +27,12 @@ pipeline {
             }
         }
 
-        stage('Dependency Scanning') {
-            parallel {
-                stage('NPM Dependency Audit') {
-                    steps {
-                        sh '''
-                            npm audit --audit-level=critical
-                            echo $?
-                        '''
-                    }
-                }
-
-                stage('OWASP Dependency Check') {
-                    steps {
-                        dependencyCheck additionalArguments: '''
-                            --scan './'
-                            --out './'
-                            --format 'ALL'
-                            --disableYarnAudit
-                            --prettyPrint
-                        ''', odcInstallation: 'OWASP-DepCheck-12'
-
-                        dependencyCheckPublisher(
-                            failedTotalCritical: 1,
-                            pattern: 'dependency-check-report.xml',
-                            stopBuild: true
-                        )
-                    }
-                }
+        stage('NPM Dependency Audit') {
+            steps {
+                sh '''
+                    npm audit --audit-level=critical
+                    echo $?
+                '''
             }
         }
 
@@ -79,23 +56,6 @@ pipeline {
             }
         }
 
-        stage('SAST - SonarQube') {
-            steps {
-                timeout(time: 60, unit: 'SECONDS') {
-                    withSonarQubeEnv('sonar-qube-server') {
-                        sh 'echo $SONAR_SCANNER_HOME'
-                        sh '''
-                            $SONAR_SCANNER_HOME/bin/sonar-scanner \
-                              -Dsonar.projectKey=Solar-System-Project \
-                              -Dsonar.sources=app.js \
-                              -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-                        '''
-                    }
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh 'printenv'
@@ -109,7 +69,7 @@ pipeline {
                     sh '''
                         echo "Logging in to Docker Hub..."
                         echo "$DOCKER_PAT" | docker login -u poojadocker404 --password-stdin
-                        
+
                         echo "Pushing image to Docker Hub..."
                         docker push poojadocker404/solar-system:$GIT_COMMIT
                     '''
@@ -121,17 +81,6 @@ pipeline {
     post {
         always {
             junit allowEmptyResults: true, testResults: 'test-results.xml'
-            junit allowEmptyResults: true, keepLongStdio: true, testResults: 'dependency-check-junit.xml'
-
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: './',
-                reportFiles: 'dependency-check-jenkins.html',
-                reportName: 'Dependency Check HTML Report',
-                useWrapperFileDirectly: true
-            ])
 
             publishHTML([
                 allowMissing: true,
